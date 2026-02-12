@@ -141,8 +141,14 @@ function App() {
           type={type}
           value={value}
           onChange={(e)=>{
-            if(["firstName","middleName","lastName","suffix","religion"].includes(field)) handleLettersOnly(e,field);
-            else if(["mobile","landline","yearGS","yearJHS","yearSHS","gradeAverageSHS","zipCode"].includes(field)) handleNumbersOnly(e,field,maxLength||255);
+            // Letters-only fields
+            if([
+              "firstName","middleName","lastName","suffix","religion",
+              "schoolGS","schoolJHS","schoolSHS"
+            ].includes(field)) handleLettersOnly(e,field);
+            // Numbers-only fields
+            else if(["mobile","landline","yearGS","yearJHS","yearSHS","gradeAverageSHS","zipCode"].includes(field))
+              handleNumbersOnly(e,field,maxLength||255);
             else handleTextChange(e,field);
           }}
           onBlur={()=>handleTouch(field)}
