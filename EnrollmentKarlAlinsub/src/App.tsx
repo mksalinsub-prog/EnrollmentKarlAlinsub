@@ -177,7 +177,7 @@ function App() {
 
   return (
     <div className="container">
-      <h1>ADEi University Registration Portal</h1>
+      <h1>Alinsub University Registration Portal</h1>
       <form onSubmit={handleSubmit}>
 
         {/* PERSONAL INFORMATION */}
@@ -237,7 +237,7 @@ function App() {
             {renderInput("Barangay", "barangay")}
             {renderInput("City", "city")}
             {renderInput("Province", "province")}
-            {renderInput("Zip Code", "zipCode")}
+            {renderInput("Zip Code", "zipCode", 4)}
           </div>
         </fieldset>
 
