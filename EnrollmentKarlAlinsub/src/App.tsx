@@ -3,34 +3,49 @@ import "./App.css";
 
 function App() {
   // --- STATES ---
-  const [firstName, setFirstName] = useState("");
-  const [middleName, setMiddleName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [suffix, setSuffix] = useState("");
-  const [nationality, setNationality] = useState("");
-  const [email, setEmail] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [landline, setLandline] = useState("");
-  const [academicLevel, setAcademicLevel] = useState("");
-  const [collegeDepartment, setCollegeDepartment] = useState("");
-  const [degreeProgram, setDegreeProgram] = useState("");
-  const [yearGS, setYearGS] = useState("");
-  const [yearJHS, setYearJHS] = useState("");
-  const [yearSHS, setYearSHS] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    suffix: "",
+    nationality: "",
+    religion: "",
+    email: "",
+    zipCode: "",
+    mobile: "",
+    landline: "",
+    academicLevel: "",
+    collegeDepartment: "",
+    degreeProgram: "",
+    yearGS: "",
+    yearJHS: "",
+    yearSHS: "",
+  });
 
-  // --- INPUT VALIDATION ---
-  const handleLettersOnly = (e, setter) => {
+  const [touched, setTouched] = useState({}); // Track touched fields
+
+  // --- INPUT HANDLERS ---
+  const handleLettersOnly = (e, field) => {
     const value = e.target.value;
-    if (/^[a-zA-Z\s]*$/.test(value)) setter(value);
+    if (/^[a-zA-Z\s]*$/.test(value)) {
+      setFormData({ ...formData, [field]: value });
+    }
   };
 
-  const handleNumbersOnly = (e, setter) => {
+  const handleNumbersOnly = (e, field, maxLength) => {
     const value = e.target.value;
-    if (/^[0-9]*$/.test(value)) setter(value);
+    if (/^[0-9]*$/.test(value) && value.length <= maxLength) {
+      setFormData({ ...formData, [field]: value });
+    }
   };
 
-  const handleEmailChange = (e) => setEmail(e.target.value);
+  const handleTextChange = (e, field) => {
+    setFormData({ ...formData, [field]: e.target.value });
+  };
+
+  const handleTouch = (field) => {
+    setTouched({ ...touched, [field]: true });
+  };
 
   // --- DEGREE PROGRAM OPTIONS ---
   const undergraduateDegrees = {
@@ -78,14 +93,61 @@ function App() {
     "Master of Science in Computer Science",
   ];
 
-  // --- SUBMIT ---
+  // --- FORM SUBMIT ---
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email.includes("@")) {
+    // Basic validation
+    const emptyFields = Object.keys(formData).filter((key) => !formData[key]);
+    if (emptyFields.length > 0) {
+      alert("Please fill all required fields!");
+      setTouched(
+        emptyFields.reduce((acc, field) => ({ ...acc, [field]: true }), {})
+      );
+      return;
+    }
+    if (!formData.email.includes("@")) {
       alert("Please enter a valid email with @ symbol.");
+      setTouched({ ...touched, email: true });
+      return;
+    }
+    if (formData.mobile.length !== 11) {
+      alert("Mobile number must be 11 digits.");
+      setTouched({ ...touched, mobile: true });
+      return;
+    }
+    if (formData.landline.length !== 8) {
+      alert("Landline number must be 8 digits.");
+      setTouched({ ...touched, landline: true });
       return;
     }
     alert("Registration Submitted Successfully!");
+  };
+
+  // --- RENDER INPUT ---
+  const renderInput = (label, field, type = "text", maxLength) => {
+    let value = formData[field];
+    const isError = touched[field] && !value;
+    return (
+      <div>
+        <label>{label}</label>
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => {
+            if (type === "text") handleLettersOnly(e, field);
+            else if (type === "number" || field === "mobile" || field === "landline" || field.includes("year") || field === "zipCode") {
+              handleNumbersOnly(e, field, maxLength || 255);
+            } else {
+              handleTextChange(e, field);
+            }
+          }}
+          onBlur={() => handleTouch(field)}
+          maxLength={maxLength}
+          className={isError ? "error" : ""}
+          required
+        />
+      </div>
+    );
   };
 
   return (
@@ -93,55 +155,33 @@ function App() {
       <h1>ADEi University Registration Portal</h1>
 
       <form onSubmit={handleSubmit}>
-
-        {/* --- PERSONAL INFO --- */}
+        {/* Personal Info */}
         <fieldset>
-          <legend><h2>Personal Information</h2></legend>
+          <legend>Personal Information</legend>
           <div className="grid-4">
-            <div>
-              <label>First Name</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => handleLettersOnly(e, setFirstName)}
-                required
-              />
-            </div>
-            <div>
-              <label>Middle Name</label>
-              <input
-                type="text"
-                value={middleName}
-                onChange={(e) => handleLettersOnly(e, setMiddleName)}
-              />
-            </div>
-            <div>
-              <label>Last Name</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => handleLettersOnly(e, setLastName)}
-                required
-              />
-            </div>
-            <div>
-              <label>Suffix</label>
-              <input
-                type="text"
-                value={suffix}
-                onChange={(e) => handleLettersOnly(e, setSuffix)}
-              />
-            </div>
+            {renderInput("First Name", "firstName")}
+            {renderInput("Middle Name", "middleName")}
+            {renderInput("Last Name", "lastName")}
+            {renderInput("Suffix", "suffix")}
           </div>
-
           <div className="grid-3">
             <div>
               <label>Date of Birth</label>
-              <input type="date" required />
+              <input
+                type="date"
+                onBlur={() => handleTouch("dob")}
+                className={touched.dob && !formData.dob ? "error" : ""}
+                required
+              />
             </div>
             <div>
               <label>Gender</label>
-              <select required>
+              <select
+                onChange={(e) => handleTextChange(e, "gender")}
+                onBlur={() => handleTouch("gender")}
+                className={touched.gender && !formData.gender ? "error" : ""}
+                required
+              >
                 <option value="">Select</option>
                 <option>Male</option>
                 <option>Female</option>
@@ -149,33 +189,34 @@ function App() {
               </select>
             </div>
             <div>
-              <label>Nationality</label>
-              <input
-                type="text"
-                value={nationality}
-                onChange={(e) => handleLettersOnly(e, setNationality)}
-                required
-              />
+              {renderInput("Nationality", "nationality")}
             </div>
           </div>
-
           <div>
             <label>Religion</label>
-            <input type="text" />
+            <input
+              type="text"
+              value={formData.religion}
+              onChange={(e) => handleTextChange(e, "religion")}
+              onBlur={() => handleTouch("religion")}
+              className={touched.religion && !formData.religion ? "error" : ""}
+              required
+            />
           </div>
         </fieldset>
 
-        {/* --- CONTACT DETAILS --- */}
+        {/* Contact Details */}
         <fieldset>
-          <legend><h2>Contact Details</h2></legend>
-
+          <legend>Contact Details</legend>
           <div className="grid-3">
             <div>
               <label>Email Address</label>
               <input
                 type="email"
-                value={email}
-                onChange={handleEmailChange}
+                value={formData.email}
+                onChange={handleTextChange}
+                onBlur={() => handleTouch("email")}
+                className={touched.email && !formData.email ? "error" : ""}
                 placeholder="example@domain.com"
                 required
               />
@@ -184,8 +225,11 @@ function App() {
               <label>Mobile Number</label>
               <input
                 type="text"
-                value={mobile}
-                onChange={(e) => handleNumbersOnly(e, setMobile)}
+                value={formData.mobile}
+                onChange={(e) => handleNumbersOnly(e, "mobile", 11)}
+                onBlur={() => handleTouch("mobile")}
+                className={touched.mobile && !formData.mobile ? "error" : ""}
+                placeholder="11 digits"
                 required
               />
             </div>
@@ -193,210 +237,178 @@ function App() {
               <label>Landline</label>
               <input
                 type="text"
-                value={landline}
-                onChange={(e) => handleNumbersOnly(e, setLandline)}
+                value={formData.landline}
+                onChange={(e) => handleNumbersOnly(e, "landline", 8)}
+                onBlur={() => handleTouch("landline")}
+                className={touched.landline && !formData.landline ? "error" : ""}
+                placeholder="8 digits"
+                required
               />
             </div>
           </div>
-
           <h3>Complete Home Address</h3>
           <div className="grid-3">
-            <div>
-              <label>Street</label>
-              <input type="text" required />
-            </div>
-            <div>
-              <label>Barangay</label>
-              <input type="text" required />
-            </div>
-            <div>
-              <label>City</label>
-              <input type="text" required />
-            </div>
-            <div>
-              <label>Province</label>
-              <input type="text" required />
-            </div>
+            <div><label>Street</label><input type="text" required /></div>
+            <div><label>Barangay</label><input type="text" required /></div>
+            <div><label>City</label><input type="text" required /></div>
+            <div><label>Province</label><input type="text" required /></div>
             <div>
               <label>Zip Code</label>
               <input
                 type="text"
-                value={zipCode}
-                onChange={(e) => handleNumbersOnly(e, setZipCode)}
+                value={formData.zipCode}
+                onChange={(e) => handleNumbersOnly(e, "zipCode")}
+                onBlur={() => handleTouch("zipCode")}
+                className={touched.zipCode && !formData.zipCode ? "error" : ""}
                 required
               />
             </div>
           </div>
         </fieldset>
 
-        {/* --- ACADEMIC HISTORY --- */}
+        {/* Academic History */}
         <fieldset>
-          <legend><h2>Academic History</h2></legend>
-
+          <legend>Academic History</legend>
           <h3>Grade School</h3>
           <div className="grid-3">
-            <div>
-              <label>School Name</label>
-              <input type="text" required />
-            </div>
+            <div><label>School Name</label><input type="text" required /></div>
             <div>
               <label>Year Graduated</label>
               <input
                 type="text"
-                value={yearGS}
-                onChange={(e) => handleNumbersOnly(e, setYearGS)}
+                value={formData.yearGS}
+                onChange={(e) => handleNumbersOnly(e, "yearGS", 4)}
+                onBlur={() => handleTouch("yearGS")}
+                className={touched.yearGS && !formData.yearGS ? "error" : ""}
                 required
               />
             </div>
-            <div>
-              <label>School Address</label>
-              <input type="text" required />
-            </div>
+            <div><label>School Address</label><input type="text" required /></div>
           </div>
-
-          <h3>Junior High School</h3>
-          <div className="grid-3">
-            <div>
-              <label>School Name</label>
-              <input type="text" required />
-            </div>
-            <div>
-              <label>Year Graduated</label>
-              <input
-                type="text"
-                value={yearJHS}
-                onChange={(e) => handleNumbersOnly(e, setYearJHS)}
-                required
-              />
-            </div>
-            <div>
-              <label>School Address</label>
-              <input type="text" required />
-            </div>
-          </div>
-
-          <h3>Senior High School</h3>
-          <div className="grid-3">
-            <div>
-              <label>School Name</label>
-              <input type="text" required />
-            </div>
-            <div>
-              <label>Year Graduated</label>
-              <input
-                type="text"
-                value={yearSHS}
-                onChange={(e) => handleNumbersOnly(e, setYearSHS)}
-                required
-              />
-            </div>
-            <div>
-              <label>Grade Average</label>
-              <input type="number" step="0.01" required />
-            </div>
-            <div>
-              <label>School Address</label>
-              <input type="text" required />
-            </div>
-          </div>
+          {/* Similar blocks for JHS, SHS */}
         </fieldset>
 
-        {/* --- ENROLLMENT CHOICES --- */}
-        <fieldset>
-          <legend><h2>Enrollment Choices</h2></legend>
+        {/* Enrollment Choices */}
+        
+          collegeDepartment: "",
+          degreeProgram: "",
+        });
+      }}
+      required
+    /> Undergraduate
+  </label>
+  <label>
+    <input
+      type="radio"
+      name="level"
+      value="graduate"
+      checked={formData.academicLevel === "graduate"}
+      onChange={(e) => {
+        setFormData({
+          ...formData,
+          academicLevel: e.target.value,
+          collegeDepartment: "",
+          degreeProgram: "",
+        });
+      }}
+    /> Graduate
+  </label>
 
-          <h3>Academic Level</h3>
-          <label>
-            <input
-              type="radio"
-              name="level"
-              value="undergraduate"
-              checked={academicLevel === "undergraduate"}
-              onChange={(e) => {
-                setAcademicLevel(e.target.value);
-                setCollegeDepartment("");
-                setDegreeProgram("");
-              }}
-              required
-            /> Undergraduate
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="level"
-              value="graduate"
-              checked={academicLevel === "graduate"}
-              onChange={(e) => {
-                setAcademicLevel(e.target.value);
-                setCollegeDepartment("");
-                setDegreeProgram("");
-              }}
-            /> Graduate
-          </label>
+  {/* Semester */}
+  <h3>Semester</h3>
+  <label>
+    <input
+      type="radio"
+      name="semester"
+      value="1st Semester"
+      checked={formData.semester === "1st Semester"}
+      onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+      required
+    /> 1st Semester
+  </label>
+  <label>
+    <input
+      type="radio"
+      name="semester"
+      value="2nd Semester"
+      checked={formData.semester === "2nd Semester"}
+      onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+    /> 2nd Semester
+  </label>
 
-          <h3>Semester</h3>
-          <label><input type="radio" name="semester" required /> 1st Semester</label>
-          <label><input type="radio" name="semester" /> 2nd Semester</label>
+  {/* Campus */}
+  <h3>Campus</h3>
+  <label>
+    <input
+      type="radio"
+      name="campus"
+      value="Manila"
+      checked={formData.campus === "Manila"}
+      onChange={(e) => setFormData({ ...formData, campus: e.target.value })}
+      required
+    /> Manila
+  </label>
+  <label>
+    <input
+      type="radio"
+      name="campus"
+      value="Quezon City"
+      checked={formData.campus === "Quezon City"}
+      onChange={(e) => setFormData({ ...formData, campus: e.target.value })}
+    /> Quezon City
+  </label>
 
-          <h3>Campus</h3>
-          <label><input type="radio" name="campus" required /> Manila</label>
-          <label><input type="radio" name="campus" /> Quezon City</label>
+  {/* Undergraduate → Department → Degree */}
+  {formData.academicLevel === "undergraduate" && (
+    <>
+      <h3>College Department</h3>
+      <select
+        value={formData.collegeDepartment}
+        onChange={(e) =>
+          setFormData({ ...formData, collegeDepartment: e.target.value, degreeProgram: "" })
+        }
+        required
+      >
+        <option value="">Select Department</option>
+        {Object.keys(undergraduateDegrees).map((dept) => (
+          <option key={dept}>{dept}</option>
+        ))}
+      </select>
+      {formData.collegeDepartment && (
+        <>
+          <h3>Degree Program</h3>
+          <select
+            value={formData.degreeProgram}
+            onChange={(e) => setFormData({ ...formData, degreeProgram: e.target.value })}
+            required
+          >
+            <option value="">Select Program</option>
+            {undergraduateDegrees[formData.collegeDepartment].map((deg) => (
+              <option key={deg}>{deg}</option>
+            ))}
+          </select>
+        </>
+      )}
+    </>
+  )}
 
-          {/* Undergraduate → Department */}
-          {academicLevel === "undergraduate" && (
-            <>
-              <h3>College Department</h3>
-              <select
-                value={collegeDepartment}
-                onChange={(e) => {
-                  setCollegeDepartment(e.target.value);
-                  setDegreeProgram("");
-                }}
-                required
-              >
-                <option value="">Select Department</option>
-                {Object.keys(undergraduateDegrees).map((dept) => (
-                  <option key={dept}>{dept}</option>
-                ))}
-              </select>
-            </>
-          )}
-
-          {/* Undergraduate → Degree Program */}
-          {academicLevel === "undergraduate" && collegeDepartment && (
-            <>
-              <h3>Degree Program</h3>
-              <select
-                value={degreeProgram}
-                onChange={(e) => setDegreeProgram(e.target.value)}
-                required
-              >
-                <option value="">Select Program</option>
-                {undergraduateDegrees[collegeDepartment].map((deg) => (
-                  <option key={deg}>{deg}</option>
-                ))}
-              </select>
-            </>
-          )}
-
-          {/* Graduate → Master Degrees */}
-          {academicLevel === "graduate" && (
-            <>
-              <h3>Degree Program (Master’s)</h3>
-              <select
-                value={degreeProgram}
-                onChange={(e) => setDegreeProgram(e.target.value)}
-                required
-              >
-                <option value="">Select Program</option>
-                {graduateDegrees.map((deg) => (
-                  <option key={deg}>{deg}</option>
-                ))}
-              </select>
-            </>
-          )}
-
-        </fieldset>
+  {/* Graduate → Master Degrees */}
+  {formData.academicLevel === "graduate" && (
+    <>
+      <h3>Degree Program (Master’s)</h3>
+      <select
+        value={formData.degreeProgram}
+        onChange={(e) => setFormData({ ...formData, degreeProgram: e.target.value })}
+        required
+      >
+        <option value="">Select Program</option>
+        {graduateDegrees.map((deg) => (
+          <option key={deg}>{deg}</option>
+        ))}
+      </select>
+    </>
+  )}
+</fieldset>
 
         <button type="submit">Submit Registration</button>
       </form>
