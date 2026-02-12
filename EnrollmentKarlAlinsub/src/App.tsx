@@ -1,9 +1,42 @@
+import { useState } from "react";
 import "./App.css";
 
 function App() {
+  // States for input validations
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [suffix, setSuffix] = useState("");
+  const [nationality, setNationality] = useState("");
+  const [email, setEmail] = useState("");
+  const [zipCode, setZipCode] = useState("");
+
+  // Handlers
+  const handleLettersOnly = (e, setter) => {
+    const value = e.target.value;
+    if (/^[a-zA-Z\s]*$/.test(value)) {
+      setter(value);
+    }
+  };
+
+  const handleZipOnly = (e) => {
+    const value = e.target.value;
+    if (/^[0-9]*$/.test(value)) {
+      setZipCode(value);
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Basic email validation
+    if (!email.includes("@")) {
+      alert("Please enter a valid email with @ symbol.");
+      return;
+    }
     alert("Registration Submitted Successfully!");
   };
 
@@ -20,22 +53,40 @@ function App() {
           <div className="grid-4">
             <div>
               <label>First Name</label>
-              <input type="text" required />
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => handleLettersOnly(e, setFirstName)}
+                required
+              />
             </div>
 
             <div>
               <label>Middle Name</label>
-              <input type="text" />
+              <input
+                type="text"
+                value={middleName}
+                onChange={(e) => handleLettersOnly(e, setMiddleName)}
+              />
             </div>
 
             <div>
               <label>Last Name</label>
-              <input type="text" required />
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => handleLettersOnly(e, setLastName)}
+                required
+              />
             </div>
 
             <div>
               <label>Suffix</label>
-              <input type="text" />
+              <input
+                type="text"
+                value={suffix}
+                onChange={(e) => handleLettersOnly(e, setSuffix)}
+              />
             </div>
           </div>
 
@@ -57,12 +108,13 @@ function App() {
 
             <div>
               <label>Nationality</label>
-              <select required>
-                <option value="">Select</option>
-                <option>Filipino</option>
-                <option>American</option>
-                <option>Other</option>
-              </select>
+              <input
+                type="text"
+                value={nationality}
+                onChange={(e) => handleLettersOnly(e, setNationality)}
+                placeholder="Type your country"
+                required
+              />
             </div>
           </div>
 
@@ -72,7 +124,6 @@ function App() {
           </div>
         </fieldset>
 
-
         {/* CONTACT DETAILS */}
         <fieldset>
           <legend><h2>Contact Details</h2></legend>
@@ -80,7 +131,13 @@ function App() {
           <div className="grid-3">
             <div>
               <label>Email Address</label>
-              <input type="email" required />
+              <input
+                type="email"
+                value={email}
+                onChange={handleEmailChange}
+                placeholder="example@domain.com"
+                required
+              />
             </div>
 
             <div>
@@ -119,11 +176,15 @@ function App() {
 
             <div>
               <label>Zip Code</label>
-              <input type="text" required />
+              <input
+                type="text"
+                value={zipCode}
+                onChange={handleZipOnly}
+                required
+              />
             </div>
           </div>
         </fieldset>
-
 
         {/* ACADEMIC HISTORY */}
         <fieldset>
@@ -189,7 +250,6 @@ function App() {
           </div>
         </fieldset>
 
-
         {/* ENROLLMENT CHOICES */}
         <fieldset>
           <legend><h2>Enrollment Choices</h2></legend>
@@ -228,9 +288,7 @@ function App() {
           </select>
         </fieldset>
 
-
         <button type="submit">Submit Registration</button>
-
       </form>
     </div>
   );
