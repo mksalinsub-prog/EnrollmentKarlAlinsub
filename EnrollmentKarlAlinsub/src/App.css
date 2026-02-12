@@ -1,25 +1,49 @@
+/* Body and Container */
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f9;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #ffefba, #ffffff); /* soft New Year gradient */
+  margin: 0;
+  padding: 0;
 }
 
 .container {
   width: 90%;
   max-width: 1100px;
-  margin: auto;
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  margin-top: 40px;
+  margin: 40px auto;
+  background: linear-gradient(to bottom, #fff3e0, #ffe0b2);
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border: 3px solid #ff9800;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Header */
+h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  color: #d84315;
+  text-shadow: 2px 2px 4px #ffa726;
+  margin-bottom: 30px;
+}
+
+/* Fieldset styling */
 fieldset {
   margin-bottom: 25px;
   padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 12px;
+  border: 2px dashed #ff9800;
+  background: rgba(255, 255, 255, 0.8);
 }
 
+legend {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #e65100;
+}
+
+/* Grid layout */
 .grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -32,32 +56,69 @@ fieldset {
   gap: 15px;
 }
 
+/* Inputs and Selects */
 input, select {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   margin-top: 5px;
+  border: 2px solid #ffb74d;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
 input:focus, select:focus {
-  outline: 2px solid #007bff;
+  outline: none;
+  border-color: #ff6f00;
+  box-shadow: 0 0 8px #ff6f00;
 }
 
+/* Error Highlight */
+input.error, select.error {
+  border: 2px solid red;
+  background-color: #ffe6e6;
+}
+
+/* Buttons */
 button {
   width: 100%;
-  padding: 12px;
-  background: #007bff;
-  color: white;
+  padding: 15px;
+  font-size: 1.1rem;
+  background: linear-gradient(45deg, #ff8a65, #ff7043);
+  color: #fff;
   border: none;
+  border-radius: 12px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
 }
 
 button:hover {
-  background: #0056b3;
+  background: linear-gradient(45deg, #ff7043, #d84315);
+  box-shadow: 0 5px 15px rgba(216, 67, 21, 0.5);
 }
 
+/* Labels */
+label {
+  font-weight: bold;
+  color: #bf360c;
+}
+
+/* H3 Headers */
+h3 {
+  margin-top: 20px;
+  color: #e64a19;
+  text-shadow: 1px 1px 2px #ffccbc;
+}
+
+/* Radio Buttons spacing */
+label input[type="radio"] {
+  margin-right: 8px;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .grid-4,
-  .grid-3 {
+  .grid-4, .grid-3 {
     grid-template-columns: 1fr;
   }
 }
