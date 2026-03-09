@@ -1,119 +1,178 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import "./App.css";
 
+type AcademicLevel = "" | "undergraduate" | "graduate";
+type Semester = "" | "1st Semester" | "2nd Semester";
+type Campus = "" | "Manila" | "Quezon City";
+
+type UndergraduateDepartment =
+  | ""
+  | "College of Engineering and Architecture"
+  | "College of Computer Studies"
+  | "College of Business Education"
+  | "College of Arts";
+
+interface FormData {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  suffix: string;
+  dob: string;
+  gender: string;
+  nationality: string;
+  nationalityOther: string;
+  religion: string;
+  email: string;
+  mobile: string;
+  landline: string;
+  street: string;
+  barangay: string;
+  city: string;
+  province: string;
+  zipCode: string;
+  schoolGS: string;
+  yearGS: string;
+  schoolAddressGS: string;
+  schoolJHS: string;
+  yearJHS: string;
+  schoolAddressJHS: string;
+  schoolSHS: string;
+  yearSHS: string;
+  gradeAverageSHS: string;
+  schoolAddressSHS: string;
+  academicLevel: AcademicLevel;
+  collegeDepartment: UndergraduateDepartment;
+  degreeProgram: string;
+  semester: Semester;
+  campus: Campus;
+}
+
+type TouchedFields = Partial<Record<keyof FormData, boolean>>;
+
+const initialForm: FormData = {
+  firstName: "",
+  middleName: "",
+  lastName: "",
+  suffix: "",
+  dob: "",
+  gender: "",
+  nationality: "",
+  nationalityOther: "",
+  religion: "",
+  email: "",
+  mobile: "",
+  landline: "",
+  street: "",
+  barangay: "",
+  city: "",
+  province: "",
+  zipCode: "",
+  schoolGS: "",
+  yearGS: "",
+  schoolAddressGS: "",
+  schoolJHS: "",
+  yearJHS: "",
+  schoolAddressJHS: "",
+  schoolSHS: "",
+  yearSHS: "",
+  gradeAverageSHS: "",
+  schoolAddressSHS: "",
+  academicLevel: "",
+  collegeDepartment: "",
+  degreeProgram: "",
+  semester: "",
+  campus: "",
+};
+
+const undergraduateDegrees: Record<
+  Exclude<UndergraduateDepartment, "">,
+  string[]
+> = {
+  "College of Engineering and Architecture": [
+    "BS Architecture",
+    "BS Chemical Engineering",
+    "BS Civil Engineering",
+    "BS Computer Engineering",
+    "BS Electrical Engineering",
+    "BS Electronics Engineering",
+    "BS Industrial Engineering",
+    "BS Mechanical Engineering",
+  ],
+  "College of Computer Studies": [
+    "BS Computer Science",
+    "BS Data Science and Analytics",
+    "BS Entertainment and Multimedia Computing",
+    "BS Information Technology",
+  ],
+  "College of Business Education": [
+    "BS Accountancy",
+    "BS Accounting Information System",
+    "BS Business Administration",
+    "Financial Management",
+    "Human Resource Management",
+    "Logistics and Supply Chain Management",
+    "Marketing Management",
+  ],
+  "College of Arts": [
+    "Bachelor of Arts in English Language",
+    "Bachelor of Arts in Political Science",
+  ],
+};
+
+const graduateDegrees: string[] = [
+  "Master in Information Systems",
+  "Master in Information Technology",
+  "Master in Logistics and Supply Chain Management",
+  "Master of Engineering with Specialization in Civil Engineering",
+  "Master of Engineering with Specialization in Computer Engineering",
+  "Master of Engineering with Specialization in Electrical Engineering",
+  "Master of Engineering with Specialization in Electronics Engineering",
+  "Master of Engineering with Specialization in Industrial Engineering",
+  "Master of Engineering with Specialization in Mechanical Engineering",
+  "Master of Science in Computer Science",
+];
+
 function App() {
-  const initialForm = {
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    suffix: "",
-    dob: "",
-    gender: "",
-    nationality: "",
-    nationalityOther: "",
-    religion: "",
-    email: "",
-    mobile: "",
-    landline: "",
-    street: "",
-    barangay: "",
-    city: "",
-    province: "",
-    zipCode: "",
-    schoolGS: "",
-    yearGS: "",
-    schoolAddressGS: "",
-    schoolJHS: "",
-    yearJHS: "",
-    schoolAddressJHS: "",
-    schoolSHS: "",
-    yearSHS: "",
-    gradeAverageSHS: "",
-    schoolAddressSHS: "",
-    academicLevel: "",
-    collegeDepartment: "",
-    degreeProgram: "",
-    semester: "",
-    campus: "",
-  };
+  const [formData, setFormData] = useState<FormData>(initialForm);
+  const [touched, setTouched] = useState<TouchedFields>({});
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const [formData, setFormData] = useState(initialForm);
-  const [touched, setTouched] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-
-  // --- OPTIONS ---
-  const undergraduateDegrees = {
-    "College of Engineering and Architecture": [
-      "BS Architecture",
-      "BS Chemical Engineering",
-      "BS Civil Engineering",
-      "BS Computer Engineering",
-      "BS Electrical Engineering",
-      "BS Electronics Engineering",
-      "BS Industrial Engineering",
-      "BS Mechanical Engineering",
-    ],
-    "College of Computer Studies": [
-      "BS Computer Science",
-      "BS Data Science and Analytics",
-      "BS Entertainment and Multimedia Computing",
-      "BS Information Technology",
-    ],
-    "College of Business Education": [
-      "BS Accountancy",
-      "BS Accounting Information System",
-      "BS Business Administration",
-      "Financial Management",
-      "Human Resource Management",
-      "Logistics and Supply Chain Management",
-      "Marketing Management",
-    ],
-    "College of Arts": [
-      "Bachelor of Arts in English Language",
-      "Bachelor of Arts in Political Science",
-    ],
-  };
-
-  const graduateDegrees = [
-    "Master in Information Systems",
-    "Master in Information Technology",
-    "Master in Logistics and Supply Chain Management",
-    "Master of Engineering with Specialization in Civil Engineering",
-    "Master of Engineering with Specialization in Computer Engineering",
-    "Master of Engineering with Specialization in Electrical Engineering",
-    "Master of Engineering with Specialization in Electronics Engineering",
-    "Master of Engineering with Specialization in Industrial Engineering",
-    "Master of Engineering with Specialization in Mechanical Engineering",
-    "Master of Science in Computer Science",
-  ];
-
-  // --- INPUT HANDLERS ---
-  const handleLettersOnly = (e, field) => {
+  const handleLettersOnly = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof FormData
+  ): void => {
     const value = e.target.value;
     if (/^[a-zA-Z\s]*$/.test(value)) {
-      setFormData({ ...formData, [field]: value });
+      setFormData((prev) => ({ ...prev, [field]: value }));
     }
   };
 
-  const handleNumbersOnly = (e, field, maxLength) => {
+  const handleNumbersOnly = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof FormData,
+    maxLength: number
+  ): void => {
     const value = e.target.value;
     if (/^[0-9]*$/.test(value) && value.length <= maxLength) {
-      setFormData({ ...formData, [field]: value });
+      setFormData((prev) => ({ ...prev, [field]: value }));
     }
   };
 
-  const handleTextChange = (e, field) => {
-    setFormData({ ...formData, [field]: e.target.value });
+  const handleTextChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    field: keyof FormData
+  ): void => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const handleTouch = (field) => {
-    setTouched({ ...touched, [field]: true });
+  const handleTouch = (field: keyof FormData): void => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  // --- FORM SUBMIT ---
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    const requiredFields = [
+
+    const requiredFields: (keyof FormData)[] = [
       "firstName",
       "lastName",
       "dob",
@@ -137,57 +196,71 @@ function App() {
       "degreeProgram",
     ];
 
-    const emptyFields = requiredFields.filter((f) => {
-      if (f === "nationality" && formData.nationality === "Other")
+    const emptyFields = requiredFields.filter((field) => {
+      if (field === "nationality" && formData.nationality === "Other") {
         return !formData.nationalityOther;
-      return !formData[f];
+      }
+      return !formData[field];
     });
 
     if (emptyFields.length > 0) {
       alert("Please fill all required fields!");
-      setTouched(emptyFields.reduce((acc, f) => ({ ...acc, [f]: true }), {}));
+      const newTouched = emptyFields.reduce((acc, field) => {
+        acc[field] = true;
+        return acc;
+      }, {} as TouchedFields);
+
+      if (formData.nationality === "Other" && !formData.nationalityOther) {
+        newTouched.nationalityOther = true;
+      }
+
+      setTouched((prev) => ({ ...prev, ...newTouched }));
       return;
     }
 
     if (!formData.email.includes("@")) {
       alert("Email must contain @");
-      setTouched({ ...touched, email: true });
+      setTouched((prev) => ({ ...prev, email: true }));
       return;
     }
 
     if (formData.mobile.length !== 11) {
       alert("Mobile number must be 11 digits");
-      setTouched({ ...touched, mobile: true });
+      setTouched((prev) => ({ ...prev, mobile: true }));
       return;
     }
 
-    if (formData.landline.length !== 8) {
+    if (formData.landline && formData.landline.length !== 8) {
       alert("Landline must be 8 digits");
-      setTouched({ ...touched, landline: true });
+      setTouched((prev) => ({ ...prev, landline: true }));
       return;
     }
 
     if (formData.zipCode.length !== 4) {
       alert("Zip Code must be 4 digits");
-      setTouched({ ...touched, zipCode: true });
+      setTouched((prev) => ({ ...prev, zipCode: true }));
       return;
     }
 
-    // Show confirmation section
     setSubmitted(true);
   };
 
-  // --- RESET FORM ---
-  const handleEnrollAgain = () => {
+  const handleEnrollAgain = (): void => {
     setFormData(initialForm);
     setTouched({});
     setSubmitted(false);
   };
 
-  // --- RENDER INPUT ---
-  const renderInput = (label, field, type = "text", maxLength, isRequired = true) => {
+  const renderInput = (
+    label: string,
+    field: keyof FormData,
+    type: React.HTMLInputTypeAttribute = "text",
+    maxLength?: number,
+    isRequired: boolean = true
+  ) => {
     const value = formData[field];
-    const isError = touched[field] && isRequired && !value;
+    const isError = Boolean(touched[field] && isRequired && !value);
+
     return (
       <div>
         <label>{label}</label>
@@ -196,14 +269,33 @@ function App() {
           value={value}
           onChange={(e) => {
             if (
-              ["firstName", "middleName", "lastName", "suffix", "religion", "schoolGS", "schoolJHS", "schoolSHS"].includes(field)
-            )
+              [
+                "firstName",
+                "middleName",
+                "lastName",
+                "suffix",
+                "religion",
+                "schoolGS",
+                "schoolJHS",
+                "schoolSHS",
+              ].includes(field)
+            ) {
               handleLettersOnly(e, field);
-            else if (
-              ["mobile", "landline", "yearGS", "yearJHS", "yearSHS", "gradeAverageSHS", "zipCode"].includes(field)
-            )
-              handleNumbersOnly(e, field, maxLength || 255);
-            else handleTextChange(e, field);
+            } else if (
+              [
+                "mobile",
+                "landline",
+                "yearGS",
+                "yearJHS",
+                "yearSHS",
+                "gradeAverageSHS",
+                "zipCode",
+              ].includes(field)
+            ) {
+              handleNumbersOnly(e, field, maxLength ?? 255);
+            } else {
+              handleTextChange(e, field);
+            }
           }}
           onBlur={() => handleTouch(field)}
           maxLength={maxLength}
@@ -220,7 +312,6 @@ function App() {
 
       {!submitted ? (
         <form onSubmit={handleSubmit}>
-          {/* --- Personal Information --- */}
           <fieldset>
             <legend>Personal Information</legend>
             <div className="grid-4">
@@ -229,6 +320,7 @@ function App() {
               {renderInput("Last Name", "lastName")}
               {renderInput("Suffix", "suffix", "text", 255, false)}
             </div>
+
             <div className="grid-3">
               <div>
                 <label>Date of Birth</label>
@@ -241,6 +333,7 @@ function App() {
                   required
                 />
               </div>
+
               <div>
                 <label>Gender</label>
                 <select
@@ -251,9 +344,9 @@ function App() {
                   required
                 >
                   <option value="">Select</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Non-binary</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Non-binary">Non-binary</option>
                 </select>
               </div>
 
@@ -262,15 +355,20 @@ function App() {
                 {formData.nationality === "Other" ? (
                   <input
                     type="text"
-                    value={formData.nationalityOther || ""}
+                    value={formData.nationalityOther}
                     onChange={(e) => {
                       if (/^[a-zA-Z\s]*$/.test(e.target.value)) {
-                        setFormData({ ...formData, nationalityOther: e.target.value });
+                        setFormData((prev) => ({
+                          ...prev,
+                          nationalityOther: e.target.value,
+                        }));
                       }
                     }}
                     onBlur={() => handleTouch("nationalityOther")}
                     className={
-                      touched.nationalityOther && !formData.nationalityOther ? "error" : ""
+                      touched.nationalityOther && !formData.nationalityOther
+                        ? "error"
+                        : ""
                     }
                     placeholder="Type your nationality"
                     required
@@ -279,39 +377,46 @@ function App() {
                   <select
                     value={formData.nationality}
                     onChange={(e) =>
-                      setFormData({ ...formData, nationality: e.target.value, nationalityOther: "" })
+                      setFormData((prev) => ({
+                        ...prev,
+                        nationality: e.target.value,
+                        nationalityOther: "",
+                      }))
                     }
                     onBlur={() => handleTouch("nationality")}
-                    className={touched.nationality && !formData.nationality ? "error" : ""}
+                    className={
+                      touched.nationality && !formData.nationality ? "error" : ""
+                    }
                     required
                   >
                     <option value="">Select Nationality</option>
-                    <option>Philippines</option>
-                    <option>USA</option>
-                    <option>Canada</option>
-                    <option>Australia</option>
-                    <option>Japan</option>
-                    <option>China</option>
-                    <option>India</option>
-                    <option>Germany</option>
-                    <option>France</option>
-                    <option>Brazil</option>
-                    <option>Other</option>
+                    <option value="Philippines">Philippines</option>
+                    <option value="USA">USA</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Japan">Japan</option>
+                    <option value="China">China</option>
+                    <option value="India">India</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="Brazil">Brazil</option>
+                    <option value="Other">Other</option>
                   </select>
                 )}
               </div>
             </div>
+
             <div>{renderInput("Religion", "religion")}</div>
           </fieldset>
 
-          {/* --- Contact Details --- */}
           <fieldset>
             <legend>Contact Details</legend>
             <div className="grid-3">
               {renderInput("Email", "email", "email")}
               {renderInput("Mobile Number", "mobile", "text", 11)}
-              {renderInput("Landline", "landline", "text", 8)}
+              {renderInput("Landline", "landline", "text", 8, false)}
             </div>
+
             <h3>Complete Home Address</h3>
             <div className="grid-3">
               {renderInput("Street", "street")}
@@ -322,7 +427,6 @@ function App() {
             </div>
           </fieldset>
 
-          {/* --- Academic History --- */}
           <fieldset>
             <legend>Academic History</legend>
             <h3>Grade School</h3>
@@ -331,12 +435,14 @@ function App() {
               {renderInput("Year Graduated", "yearGS", "text", 4)}
               {renderInput("School Address", "schoolAddressGS")}
             </div>
+
             <h3>Junior High School</h3>
             <div className="grid-3">
               {renderInput("School Name", "schoolJHS")}
               {renderInput("Year Graduated", "yearJHS", "text", 4)}
               {renderInput("School Address", "schoolAddressJHS")}
             </div>
+
             <h3>Senior High School</h3>
             <div className="grid-3">
               {renderInput("School Name", "schoolSHS")}
@@ -346,7 +452,6 @@ function App() {
             </div>
           </fieldset>
 
-          {/* --- Enrollment Choices --- */}
           <fieldset>
             <legend>Enrollment Choices</legend>
 
@@ -359,31 +464,32 @@ function App() {
                     name="level"
                     value="undergraduate"
                     checked={formData.academicLevel === "undergraduate"}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        academicLevel: e.target.value,
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        academicLevel: e.target.value as AcademicLevel,
                         collegeDepartment: "",
                         degreeProgram: "",
-                      })
+                      }))
                     }
                     required
                   />{" "}
                   Undergraduate
                 </label>
+
                 <label>
                   <input
                     type="radio"
                     name="level"
                     value="graduate"
                     checked={formData.academicLevel === "graduate"}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        academicLevel: e.target.value,
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        academicLevel: e.target.value as AcademicLevel,
                         collegeDepartment: "",
                         degreeProgram: "",
-                      })
+                      }))
                     }
                   />{" "}
                   Graduate
@@ -398,18 +504,29 @@ function App() {
                     name="semester"
                     value="1st Semester"
                     checked={formData.semester === "1st Semester"}
-                    onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        semester: e.target.value as Semester,
+                      }))
+                    }
                     required
                   />{" "}
                   1st Semester
                 </label>
+
                 <label>
                   <input
                     type="radio"
                     name="semester"
                     value="2nd Semester"
                     checked={formData.semester === "2nd Semester"}
-                    onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        semester: e.target.value as Semester,
+                      }))
+                    }
                   />{" "}
                   2nd Semester
                 </label>
@@ -423,41 +540,54 @@ function App() {
                     name="campus"
                     value="Manila"
                     checked={formData.campus === "Manila"}
-                    onChange={(e) => setFormData({ ...formData, campus: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        campus: e.target.value as Campus,
+                      }))
+                    }
                     required
                   />{" "}
                   Manila
                 </label>
+
                 <label>
                   <input
                     type="radio"
                     name="campus"
                     value="Quezon City"
                     checked={formData.campus === "Quezon City"}
-                    onChange={(e) => setFormData({ ...formData, campus: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        campus: e.target.value as Campus,
+                      }))
+                    }
                   />{" "}
                   Quezon City
                 </label>
               </div>
 
-              {/* Undergraduate */}
               {formData.academicLevel === "undergraduate" && (
                 <div className="dropdown-group">
                   <label>College Department</label>
                   <select
                     value={formData.collegeDepartment}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        collegeDepartment: e.target.value,
+                      setFormData((prev) => ({
+                        ...prev,
+                        collegeDepartment:
+                          e.target.value as UndergraduateDepartment,
                         degreeProgram: "",
-                      })
+                      }))
                     }
                     required
                   >
                     <option value="">Select Department</option>
-                    {Object.keys(undergraduateDegrees).map((d) => (
-                      <option key={d}>{d}</option>
+                    {Object.keys(undergraduateDegrees).map((department) => (
+                      <option key={department} value={department}>
+                        {department}
+                      </option>
                     ))}
                   </select>
 
@@ -467,13 +597,23 @@ function App() {
                       <select
                         value={formData.degreeProgram}
                         onChange={(e) =>
-                          setFormData({ ...formData, degreeProgram: e.target.value })
+                          setFormData((prev) => ({
+                            ...prev,
+                            degreeProgram: e.target.value,
+                          }))
                         }
                         required
                       >
                         <option value="">Select Program</option>
-                        {undergraduateDegrees[formData.collegeDepartment].map((d) => (
-                          <option key={d}>{d}</option>
+                        {undergraduateDegrees[
+                          formData.collegeDepartment as Exclude<
+                            UndergraduateDepartment,
+                            ""
+                          >
+                        ].map((degree) => (
+                          <option key={degree} value={degree}>
+                            {degree}
+                          </option>
                         ))}
                       </select>
                     </>
@@ -481,18 +621,24 @@ function App() {
                 </div>
               )}
 
-              {/* Graduate */}
               {formData.academicLevel === "graduate" && (
                 <div className="dropdown-group">
                   <label>Degree Program (Master’s)</label>
                   <select
                     value={formData.degreeProgram}
-                    onChange={(e) => setFormData({ ...formData, degreeProgram: e.target.value })}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        degreeProgram: e.target.value,
+                      }))
+                    }
                     required
                   >
                     <option value="">Select Program</option>
-                    {graduateDegrees.map((d) => (
-                      <option key={d}>{d}</option>
+                    {graduateDegrees.map((degree) => (
+                      <option key={degree} value={degree}>
+                        {degree}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -509,8 +655,10 @@ function App() {
             Thank you, {formData.firstName} {formData.lastName}, for enrolling.
           </p>
           <p>
-            You have successfully registered for <strong>{formData.degreeProgram}</strong> in the{" "}
-            <strong>{formData.semester}</strong> at <strong>{formData.campus}</strong> campus.
+            You have successfully registered for{" "}
+            <strong>{formData.degreeProgram}</strong> in the{" "}
+            <strong>{formData.semester}</strong> at{" "}
+            <strong>{formData.campus}</strong> campus.
           </p>
           <button onClick={handleEnrollAgain}>Enroll Again</button>
         </div>
